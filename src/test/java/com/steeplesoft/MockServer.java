@@ -19,14 +19,7 @@ public class MockServer implements QuarkusTestResourceLifecycleManager {
         wireMockServer = new WireMockServer();
         wireMockServer.start();
 
-        stubFor(get(urlEqualTo("/search"))
-                .willReturn(aResponse()
-                        .withBody("Error")));
-
-        Map<String,String> props = new HashMap<>();
-        props.put("com.steeplesoft.GoogleClient/mp-rest/url", wireMockServer.baseUrl());
-        props.put("wiremock.url", wireMockServer.baseUrl());
-        return props;
+        return Map.of("com.steeplesoft.GoogleClient/mp-rest/url", wireMockServer.baseUrl());
     }
 
     @Override

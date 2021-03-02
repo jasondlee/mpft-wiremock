@@ -21,7 +21,7 @@ public class FailingResource {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    @Retry(maxRetries = 2)
+    @Retry(delay = 200, maxRetries = 2, jitter = 100)
     @Fallback(fallbackMethod = "doWorkFallback")
     public String hello() throws URISyntaxException {
         return client.search("microprofile");

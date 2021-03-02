@@ -25,7 +25,21 @@ public class FailingResourceTest {
 
     @Test
     public void testSuccessfulRetry() throws URISyntaxException {
-        stubRetries(2);
+        reset();
+        stubFor(get(urlEqualTo(REQUEST_URL))
+                .inScenario(SCENARIO_NAME)
+                .whenScenarioStateIs(Scenario.STARTED)
+                .willReturn(aResponse().withStatus(500))
+                .willSetStateTo(STATES[0]));
+        stubFor(get(urlEqualTo(REQUEST_URL))
+                .inScenario(SCENARIO_NAME)
+                .whenScenarioStateIs(STATES[0])
+                .willReturn(aResponse().withStatus(500))
+                .willSetStateTo(STATES[1]));
+        stubFor(get(urlEqualTo(REQUEST_URL))
+                .inScenario(SCENARIO_NAME)
+                .whenScenarioStateIs(STATES[1])
+                .willReturn(aResponse().withBody("success")));
 
         given()
                 .when()
@@ -37,7 +51,11 @@ public class FailingResourceTest {
 
     @Test
     public void testUnsuccessfulRetry() {
-        stubRetries(3);
+        reset();
+        stubFor(get(urlEqualTo(REQUEST_URL))
+                .inScenario(SCENARIO_NAME)
+                .whenScenarioStateIs(Scenario.STARTED)
+                .willReturn(aResponse().withStatus(500)));
 
         given()
                 .when()
@@ -45,27 +63,5 @@ public class FailingResourceTest {
                 .then()
                 .statusCode(200)
                 .body(is("fallback"));
-    }
-
-    private void stubRetries(int count) {
-        reset();
-        stubFor(get(urlEqualTo(REQUEST_URL))
-                .inScenario(SCENARIO_NAME)
-                .whenScenarioStateIs(Scenario.STARTED)
-                .willReturn(aResponse().withStatus(500))
-                .willSetStateTo(STATES[1]));
-
-        for (int i = 1; i < count; i++) {
-            stubFor(get(urlEqualTo(REQUEST_URL))
-                    .inScenario(SCENARIO_NAME)
-                    .whenScenarioStateIs(STATES[i])
-                    .willReturn(aResponse().withStatus(500))
-                    .willSetStateTo(STATES[i + 1]));
-        }
-
-        stubFor(get(urlEqualTo(REQUEST_URL))
-                .inScenario(SCENARIO_NAME)
-                .whenScenarioStateIs(STATES[count])
-                .willReturn(aResponse().withBody("success")));
     }
 }

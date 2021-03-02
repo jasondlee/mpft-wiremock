@@ -8,7 +8,6 @@ import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 @RegisterRestClient
-@RegisterProvider(LoggingFilter.class)
 @Path("/")
 public interface GoogleClient {
     @GET
